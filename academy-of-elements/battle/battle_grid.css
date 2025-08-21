@@ -1,0 +1,161 @@
+/* Основные стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a2e; /* Темно-синий фон */
+    color: #e6e6e6; /* Светло-серый текст */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.battle-container {
+    width: 100%;
+    max-width: 800px; /* Ограничиваем ширину для лучшего вида на больших экранах */
+    text-align: center;
+}
+
+.battle-container h1 {
+    color: #7289da; /* Фиолетово-голубой, как в основном проекте */
+    margin-bottom: 20px;
+}
+
+/* Сетка боя */
+.battle-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 столбцов */
+    grid-template-rows: repeat(6, 1fr); /* 6 рядов */
+    gap: 4px; /* Небольшой зазор между ячейками */
+    width: 100%;
+    max-width: 500px; /* Максимальная ширина сетки */
+    height: 600px; /* Фиксированная высота для квадратных ячеек */
+    margin: 0 auto;
+    border: 2px solid #4a4a6a; /* Темная рамка вокруг сетки */
+    background: #2c2c3d; /* Фон сетки */
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+/* Стили для ячеек */
+.cell {
+    /* Размеры ячейки будут определяться grid, но можно задать min/max */
+    min-width: 0; /* Позволяет ячейке сжиматься */
+    min-height: 0; /* Позволяет ячейке сжиматься */
+    
+    /* Фон и границы по умолчанию */
+    background: #3a3a52; /* Стандартный фон ячейки */
+    border: 1px solid #555; /* Граница ячейки */
+    
+    /* Центрирование содержимого */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Шрифт */
+    font-size: 24px; /* Размер шрифта/эмодзи */
+    
+    /* Курсор и переходы */
+    cursor: default; /* По умолчанию курсор стандартный */
+    transition: background 0.2s, transform 0.1s;
+    
+    /* Предотвращение выделения текста */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Стили для ячеек с магами */
+.cell.magician {
+    background: #4a752c; /* Зеленоватый фон для магов */
+    color: #ffffff;
+    font-weight: bold;
+    border-color: #3a5a22;
+}
+
+/* Стили для ячеек с существами */
+.cell.summon {
+    background: #2e8b57; /* Морская зелень для существ */
+    color: #ffffff;
+    border-color: #236b44;
+}
+
+/* Стили для ячеек с эффектами */
+.cell.effect {
+    background: #6a5acd; /* Синий для эффектов */
+    color: #ffffff;
+    border-color: #5244a1;
+}
+
+/* Стили для ячеек Игрока A и Игрока B */
+.cell.player-a {
+    /* Можно добавить дополнительные стили, если нужно */
+    /* Например, чуть светлее фон для игрока A */
+    /* filter: brightness(1.1); */
+}
+
+.cell.player-b {
+    /* Можно добавить дополнительные стили, если нужно */
+    /* Например, чуть темнее фон для игрока B */
+    /* filter: brightness(0.95); */
+}
+
+/* Стили для пустых ячеек */
+.cell.empty {
+    background: #2c2c3d; /* Фон пустой ячейки такой же, как у сетки */
+    color: #7289da; /* Цвет текста "+" */
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Стили при наведении на ячейку */
+.cell:not(.empty):hover {
+    background: #505070; /* Более светлый фон при наведении */
+    transform: scale(1.05); /* Небольшое увеличение */
+    z-index: 1; /* Поднимаем над другими для визуального акцента */
+    position: relative; /* Необходимо для z-index */
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .battle-container {
+        padding: 10px;
+    }
+    
+    .battle-grid {
+        max-width: 95vw; /* Занимать почти всю ширину на маленьких экранах */
+        height: auto; /* Высота автоматическая */
+        aspect-ratio: 5 / 6; /* Сохраняем пропорции 5x6 */
+    }
+    
+    .cell {
+        font-size: 20px; /* Уменьшаем шрифт на маленьких экранах */
+    }
+    
+    .cell.empty {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 400px) {
+    .cell {
+        font-size: 18px;
+    }
+    
+    .cell.empty {
+        font-size: 22px;
+    }
+}
+
+/* Анимации (если понадобятся) */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.cell.active {
+    animation: pulse 1s infinite;
+}
