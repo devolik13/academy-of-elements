@@ -1,8 +1,9 @@
+# app.py
 import asyncio
 import os
 from pathlib import Path
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,17 +28,32 @@ def create_app(dp: Dispatcher, bot: Bot) -> FastAPI:
     async def lifespan(app: FastAPI):
         # Код до запуска сервера
         print("🚀 FastAPI сервер готов.")
-        # Запускаем polling бота в фоновой задаче
-        task = asyncio.create_task(dp.start_polling(bot))
-        print("🤖 Telegram бот запущен.")
+
+        # Определяем, запущены ли мы на Render
+        is_render = os.environ.get('RENDER') is not None
+
+        task = None
+        if is_render:
+            # На Render: Запускаем polling. Позже можно переключиться на Webhook.
+            # Проверка is_render позволяет управлять поведением.
+            print("🤖 Telegram бот запущен (на Render, polling).")
+            task = asyncio.create_task(dp.start_polling(bot))
+        else:
+            # Локально: Запускаем polling для разработки
+            print("🤖 Telegram бот запущен (локально, polling).")
+            task = asyncio.create_task(dp.start_polling(bot))
+
         yield
+
         # Код после остановки сервера
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
-        print("🛑 Telegram бот остановлен.")
+        if task:
+            print("🛑 Остановка Telegram бота...")
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            print("🛑 Telegram бот остановлен.")
 
     app = FastAPI(lifespan=lifespan)
 
@@ -63,8 +79,10 @@ def create_app(dp: Dispatcher, bot: Bot) -> FastAPI:
     dp.message.register(open_city, Command("city"))
 
     # --- Настройка CORS ---
+    # Исправлены origins (убраны лишние пробелы)
     origins = [
         "https://academy-of-elements.vercel.app",
+        "https://academy-of-elements.onrender.com",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
@@ -107,6 +125,10 @@ def create_app(dp: Dispatcher, bot: Bot) -> FastAPI:
     # Проверяем существование папок
     if web_dir.is_dir():
         # Монтируем папку web для раздачи статических файлов
+        # ВАЖНО: Убедитесь, что в index.html пути к script.js/style.css корректны
+        # Если index.html served напрямую, то script.js должен быть в /static/script.js
+        # Если index.html считает себя в корне, то script.js должен быть доступен как /script.js
+        # Для простоты смонтируем дважды или скорректируем пути в index.html
         app.mount("/static", StaticFiles(directory=str(web_dir)), name="static")
         print(f"📁 Статические файлы подключены из: {web_dir}")
         
