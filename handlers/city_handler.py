@@ -3,8 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 async def open_city(message: types.Message):
     user_id = message.from_user.id
-    # УБРАТЬ лишние пробелы в начале этой строки!
-    web_app_url = f"https://academy-of-elements.vercel.app/?user_id={user_id}"
+    web_app_url = f"https://academy-of-elements-1.onrender.com={user_id}"
 
     builder = InlineKeyboardBuilder()
     builder.button(
