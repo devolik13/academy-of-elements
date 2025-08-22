@@ -1,9 +1,11 @@
+# handlers/city_handler.py
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 async def open_city(message: types.Message):
     user_id = message.from_user.id
-    web_app_url = f"https://academy-of-elements-1.onrender.com={user_id}"
+    # Используем URL вашего приложения на Render
+    web_app_url = f"https://academy-of-elements-1.onrender.com/?user_id={user_id}"
 
     builder = InlineKeyboardBuilder()
     builder.button(
