@@ -1,5 +1,3 @@
-# main.py
-import asyncio
 import os
 from contextlib import asynccontextmanager
 
@@ -9,10 +7,12 @@ import uvicorn
 
 # --- Импорты для aiogram ---
 from aiogram import Bot, Dispatcher
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler
+from aiohttp import web
 
 # --- Импорты из вашего проекта ---
 from dotenv import load_dotenv
-from app import create_app # Импортируем функцию создания приложения
+from app import create_app
 
 # --- Загрузка переменных окружения ---
 load_dotenv()
@@ -25,14 +25,37 @@ if not BOT_TOKEN:
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# --- Webhook настройки ---
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"https://https://academy-of-elements-1.onrender.com{WEBHOOK_PATH}"  # ЗАМЕНИТЕ на ваш URL
+
+async def on_startup(bot: Bot):
+    await bot.set_webhook(WEBHOOK_URL)
+
+async def on_shutdown(bot: Bot):
+    await bot.delete_webhook()
+
 # --- Создание приложения FastAPI ---
-# Всё необходимое теперь внутри create_app
 app = create_app(dp, bot)
+
+# --- Регистрация webhook ---
+@app.on_event("startup")
+async def startup_event():
+    await on_startup(bot)
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await on_shutdown(bot)
+
+# Регистрируем обработчик webhook
+webhook_requests_handler = SimpleRequestHandler(
+    dispatcher=dp,
+    bot=bot,
+)
+webhook_requests_handler.register(app, path=WEBHOOK_PATH)
 
 # --- ОСНОВНОЙ ЦИКЛ ---
 if __name__ == "__main__":
-    # Получаем порт от Render или используем 8000 для локального запуска
     port = int(os.environ.get("PORT", 8000))
     print(f"🚀 Запуск приложения на порту {port}...")
-    # ВАЖНО: host должен быть "0.0.0.0" для работы на Render
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
